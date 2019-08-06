@@ -14,7 +14,7 @@ COPY --from=su-exec /usr/local/bin/su-exec /su-exec
 
 # Docker
 ARG DOCKER_COMPOSE_VERSION=1.24.1
-ARG DOCKER_VERSION=5:19.03.*
+ARG DOCKER_VERSION=*
 RUN apt-get update && \
     apt-get install -y \
         apt-transport-https ca-certificates curl gnupg-agent software-properties-common figlet && \
