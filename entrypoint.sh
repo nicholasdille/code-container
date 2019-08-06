@@ -3,6 +3,18 @@ editor_exec() {
     /su-exec "$EDITOR_USER_NAME" "$@"
 }
 set -e
+
+EDITOR_USER_NAME=editor
+EDITOR_GROUP_NAME=editor
+EDITOR_UID="${EDITOR_UID:-10001}"
+EDITOR_GID="${EDITOR_GID:-10001}"
+EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
+
+groupadd -g "$EDITOR_GID" "$EDITOR_GROUP_NAME" || \
+    groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
+    true
+useradd -m -u "$EDITOR_UID" -g "$EDITOR_GID" -G 0 -s /bin/bash "$EDITOR_USER_NAME"
+
 if [ -z "${DOCKER_HOST}" ]; then
     if [ -S /var/run/docker.sock ]; then
         # Expose Docker unix socket as a TCP server
@@ -15,16 +27,6 @@ if [ -z "${DOCKER_HOST}" ]; then
         dockerd --storage-driver vfs &
     fi
 fi
-EDITOR_USER_NAME=editor
-EDITOR_GROUP_NAME=editor
-EDITOR_UID="${EDITOR_UID:-10001}"
-EDITOR_GID="${EDITOR_GID:-10001}"
-EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
-
-groupadd -g "$EDITOR_GID" "$EDITOR_GROUP_NAME" || \
-    groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
-    true
-useradd -m -u "$EDITOR_UID" -g "$EDITOR_GID" -G 0 -s /bin/bash "$EDITOR_USER_NAME"
 
 if mountpoint /files >/dev/null 2>&1; then
     editor_exec mkdir -p "/files/project"
