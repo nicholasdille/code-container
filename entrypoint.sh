@@ -1,17 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/dumb-init /bin/bash
 editor_exec() {
     /su-exec "$EDITOR_USER_NAME" "$@"
 }
 set -e
 if [ -z "${DOCKER_HOST}" ]; then
-    if [ ! -e /var/run/docker.sock ]; then
-        echo "Error: /var/run/docker.sock not mounted"
-        exit 1
+    if [ -S /var/run/docker.sock ]; then
+        # Expose Docker unix socket as a TCP server
+        # https://github.com/cdr/code-server/issues/436
+        socat TCP-LISTEN:2376,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock &>/dev/null &
+        export DOCKER_HOST=tcp://127.0.0.1:2376
+
+    else
+        usermod -aG docker editor
+        dockerd --storage-driver vfs &
     fi
-    # Expose Docker unix socket as a TCP server
-    # https://github.com/cdr/code-server/issues/436
-    socat TCP-LISTEN:2376,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock &>/dev/null &
-    export DOCKER_HOST=tcp://127.0.0.1:2376
 fi
 EDITOR_USER_NAME=editor
 EDITOR_GROUP_NAME=editor
@@ -74,4 +76,10 @@ if [ "$EDITOR_LINE_ENDINGS" != "CRLF" ]; then
     editor_exec echo '{"files.eol": "\n"}' > /home/editor/.local/share/code-server/User/settings.json
 fi
 
-exec /services.sh
+EDITOR_PORT="${EDITOR_PORT:-8443}"
+if [ ! -z "$EDITOR_PASSWORD" ]; then
+    export PASSWORD="$EDITOR_PASSWORD"
+    editor_exec code-server --port "$EDITOR_PORT" --allow-http
+else
+    editor_exec code-server --port "$EDITOR_PORT" --allow-http --no-auth
+fi
