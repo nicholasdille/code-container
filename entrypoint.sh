@@ -74,10 +74,4 @@ if [ "$EDITOR_LINE_ENDINGS" != "CRLF" ]; then
     editor_exec echo '{"files.eol": "\n"}' > /home/editor/.local/share/code-server/User/settings.json
 fi
 
-EDITOR_PORT="${EDITOR_PORT:-8443}"
-if [ ! -z "$EDITOR_PASSWORD" ]; then
-    export PASSWORD="$EDITOR_PASSWORD"
-    editor_exec dumb-init code-server --port "$EDITOR_PORT" --allow-http
-else
-    editor_exec dumb-init code-server --port "$EDITOR_PORT" --allow-http --no-auth
-fi
+exec /services.sh
