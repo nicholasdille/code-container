@@ -14,6 +14,7 @@ COPY --from=su-exec /usr/local/bin/su-exec /su-exec
 
 # Docker
 ARG DOCKER_COMPOSE_VERSION=1.24.0
+ARG DOCKER_VERSION=5:19.03.*
 RUN apt-get update && \
     apt-get install -y \
         apt-transport-https ca-certificates curl gnupg-agent software-properties-common figlet && \
@@ -23,7 +24,7 @@ RUN apt-get update && \
        $(lsb_release -cs) \
        stable" && \
     apt-get update && \
-    apt-get install -y docker-ce && \
+    apt-get install -y docker-ce=${DOCKER_VERSION} && \
     curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose && \
     curl -L "https://raw.githubusercontent.com/docker/compose/${DOCKER_COMPOSE_VERSION}/contrib/completion/bash/docker-compose" -o /etc/bash_completion.d/docker-compose && \
