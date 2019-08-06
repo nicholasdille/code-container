@@ -13,7 +13,7 @@ USER root
 COPY --from=su-exec /usr/local/bin/su-exec /su-exec
 
 # Docker
-ARG DOCKER_COMPOSE_VERSION=1.24.0
+ARG DOCKER_COMPOSE_VERSION=1.24.1
 ARG DOCKER_VERSION=5:19.03.*
 RUN apt-get update && \
     apt-get install -y \
