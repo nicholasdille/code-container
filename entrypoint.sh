@@ -4,17 +4,18 @@ editor_exec() {
 }
 set -e
 
+# User
 EDITOR_USER_NAME=editor
 EDITOR_GROUP_NAME=editor
 EDITOR_UID="${EDITOR_UID:-10001}"
 EDITOR_GID="${EDITOR_GID:-10001}"
 EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
-
 groupadd -g "$EDITOR_GID" "$EDITOR_GROUP_NAME" || \
     groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
     true
 useradd -m -u "$EDITOR_UID" -g "$EDITOR_GID" -G 0 -s /bin/bash "$EDITOR_USER_NAME"
 
+# Docker
 if [ -z "${DOCKER_HOST}" ]; then
     if [ -S /var/run/docker.sock ]; then
         # Expose Docker unix socket as a TCP server
@@ -28,6 +29,7 @@ if [ -z "${DOCKER_HOST}" ]; then
     fi
 fi
 
+# Project
 if mountpoint /files >/dev/null 2>&1; then
     editor_exec mkdir -p "/files/project"
     editor_exec ln -sf "/files/project" "/home/$EDITOR_USER_NAME/project"
@@ -71,6 +73,7 @@ if [ ! -z "$EDITOR_LOCALHOST_ALIASES" ]; then
     done
 fi
 
+# Settings
 EDITOR_LINE_ENDINGS="${EDITOR_LINE_ENDINGS:-LF}"
 if [ "$EDITOR_LINE_ENDINGS" != "CRLF" ]; then
     editor_exec git config --global core.autocrlf false
@@ -78,6 +81,7 @@ if [ "$EDITOR_LINE_ENDINGS" != "CRLF" ]; then
     editor_exec echo '{"files.eol": "\n"}' > /home/editor/.local/share/code-server/User/settings.json
 fi
 
+# Launch
 EDITOR_PORT="${EDITOR_PORT:-8443}"
 if [ ! -z "$EDITOR_PASSWORD" ]; then
     export PASSWORD="$EDITOR_PASSWORD"
