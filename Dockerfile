@@ -39,7 +39,7 @@ RUN apt-get update && \
         tldr && \
     rm -rf /var/lib/apt/lists/* && \
 	groupadd --system dockremap && \
-	useradd --system --groups dockremap dockremap && \
+	useradd --system --gid dockremap dockremap && \
 	echo 'dockremap:165536:65536' >> /etc/subuid && \
 	echo 'dockremap:165536:65536' >> /etc/subgid && \
 	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind" && \
