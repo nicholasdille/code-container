@@ -15,6 +15,7 @@ COPY --from=su-exec /usr/local/bin/su-exec /su-exec
 # Docker
 ARG DOCKER_COMPOSE_VERSION=1.24.1
 ARG DOCKER_VERSION=*
+ENV DIND_COMMIT 37498f009d8bf25fbb6199e8ccd34bed84f2874b
 RUN apt-get update && \
     apt-get install -y \
         apt-transport-https ca-certificates curl gnupg-agent software-properties-common figlet && \
@@ -34,8 +35,15 @@ RUN apt-get update && \
         curl wget \
         make git jq htop gettext strace \
         iproute2 bind9-host iputils-ping socat \
+        btrfs-progs e2fsprogs iptables openssl uidmap xfsprogs xz-utils pigz \
         tldr && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+	groupadd --system dockremap && \
+	useradd --system --groups dockremap dockremap && \
+	echo 'dockremap:165536:65536' >> /etc/subuid && \
+	echo 'dockremap:165536:65536' >> /etc/subgid && \
+	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind" && \
+	chmod +x /usr/local/bin/dind
 # Kubernetes
 RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/bin/kubectl && \
     chmod +x /usr/bin/kubectl

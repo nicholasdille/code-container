@@ -25,7 +25,7 @@ if [ -z "${DOCKER_HOST}" ]; then
 
     else
         usermod -aG docker editor
-        dockerd --storage-driver vfs &
+        /usr/local/bin/dind /usr/bin/dockerd --storage-driver vfs &
     fi
 fi
 
