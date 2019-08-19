@@ -51,4 +51,4 @@ RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/$(curl 
 
 ENTRYPOINT ["bash", "/entrypoint.sh"]
 CMD ["--allow-http", "--no-auth"]
-COPY entrypoint.sh completion.sh welcome.sh /
+COPY entrypoint.sh completion.sh welcome.sh editor.sh /
