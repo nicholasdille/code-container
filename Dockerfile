@@ -49,6 +49,11 @@ RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/$(curl 
     chmod +x /usr/bin/kubectl && \
     kubectl completion bash > /etc/bash_completion.d/kubectl
 
+ENV EDITOR_USER_NAME editor
+ENV EDITOR_GROUP_NAME editor
+ENV EDITOR_UID 10001
+ENV EDITOR_GID 10001
+
 ENTRYPOINT ["bash", "/entrypoint.sh"]
 CMD ["--allow-http", "--no-auth"]
 COPY entrypoint.sh completion.sh welcome.sh editor.sh /

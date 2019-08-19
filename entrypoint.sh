@@ -2,11 +2,6 @@
 set -e
 
 # User
-export EDITOR_USER_NAME=editor
-export EDITOR_GROUP_NAME=editor
-EDITOR_UID="${EDITOR_UID:-10001}"
-EDITOR_GID="${EDITOR_GID:-10001}"
-EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
 groupadd -g "${EDITOR_GID}" "${EDITOR_GROUP_NAME}" || \
     groupmod -n "${EDITOR_GROUP_NAME}" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
     true
@@ -43,4 +38,4 @@ if [ -z "${DOCKER_HOST}" ]; then
     fi
 fi
 
-/su-exec ${EDITOR_USER_NAME} /editor.sh
+exec /su-exec ${EDITOR_USER_NAME} /editor.sh
