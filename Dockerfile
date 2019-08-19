@@ -1,4 +1,4 @@
-FROM codercom/code-server AS su-exec
+FROM codercom/code-server:2.preview.5-vsc1.37.0 AS su-exec
 USER root
 RUN curl -o /usr/local/bin/su-exec.c https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c && \
     apt-get update && \
@@ -8,7 +8,7 @@ RUN curl -o /usr/local/bin/su-exec.c https://raw.githubusercontent.com/ncopa/su-
     chown root:root /usr/local/bin/su-exec && \
     chmod 0755 /usr/local/bin/su-exec
 
-FROM codercom/code-server
+FROM codercom/code-server:2.preview.5-vsc1.37.0
 USER root
 COPY --from=su-exec /usr/local/bin/su-exec /su-exec
 
