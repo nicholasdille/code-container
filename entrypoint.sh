@@ -43,4 +43,4 @@ if [ -z "${DOCKER_HOST}" ]; then
     fi
 fi
 
-/su-exec ${EDITOR_USER_NAME} editor.sh
+/su-exec ${EDITOR_USER_NAME} /editor.sh
