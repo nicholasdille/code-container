@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-printenv | sort
-
 # Project
 if mountpoint /files >/dev/null 2>&1; then
     mkdir -p "/files/project"
