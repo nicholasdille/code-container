@@ -34,8 +34,7 @@ fi
 EDITOR_LINE_ENDINGS="${EDITOR_LINE_ENDINGS:-LF}"
 if [ "${EDITOR_LINE_ENDINGS}" != "CRLF" ]; then
     git config --global core.autocrlf false
-    mkdir -p /home/editor/.local/share/code-server/User
-    echo '{"files.eol": "\n", "terminal.integrated.shell.linux": "/bin/bash"}' > /home/editor/.local/share/code-server/User/settings.json
+    echo '{"files.eol": "\n", "terminal.integrated.shell.linux": "/bin/bash"}' > /home/${EDITOR_USER_NAME}/.config/code-server/User/settings.json
 fi
 
 # Launch
