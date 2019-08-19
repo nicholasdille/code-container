@@ -32,7 +32,14 @@ fi
 EDITOR_LINE_ENDINGS="${EDITOR_LINE_ENDINGS:-LF}"
 if [ "${EDITOR_LINE_ENDINGS}" != "CRLF" ]; then
     git config --global core.autocrlf false
-    echo '{"files.eol": "\n", "terminal.integrated.shell.linux": "/bin/bash"}' > /home/${EDITOR_USER_NAME}/.config/code-server/User/settings.json
+    cat > /home/${EDITOR_USER_NAME}/.config/code-server/User/settings.json <<EOF
+{
+    "files.eol": "\n",
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "update.enableWindowsBackgroundUpdates": false,
+    "update.mode": "none"
+}
+EOF
 fi
 
 # Launch
