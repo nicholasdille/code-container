@@ -1,7 +1,4 @@
 #!/usr/bin/dumb-init /bin/bash
-editor_exec() {
-    /su-exec "$EDITOR_USER_NAME" "$@"
-}
 set -e
 
 # User
@@ -10,10 +7,27 @@ EDITOR_GROUP_NAME=editor
 EDITOR_UID="${EDITOR_UID:-10001}"
 EDITOR_GID="${EDITOR_GID:-10001}"
 EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
-groupadd -g "$EDITOR_GID" "$EDITOR_GROUP_NAME" || \
-    groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
+groupadd -g "${EDITOR_GID}" "${EDITOR_GROUP_NAME}" || \
+    groupmod -n "${EDITOR_GROUP_NAME}" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
     true
-useradd -m -u "$EDITOR_UID" -g "$EDITOR_GID" -G 0 -s /bin/bash "$EDITOR_USER_NAME"
+useradd -m -u "${EDITOR_UID}" -g "${EDITOR_GID}" -G 0 -s /bin/bash "${EDITOR_USER_NAME}"
+
+# Hosts
+if [ ! -z "${EDITOR_LOCALHOST_ALIASES}" ]; then
+    set +e
+    LOCALHOST="127.0.0.1"
+    DOCKER_INTERNAL=$(host host.docker.internal | head -n1 | awk '{print $NF}')
+    if [ ! -z "${DOCKER_INTERNAL}" ]; then
+        LOCALHOST="${DOCKER_INTERNAL}"
+        # include special hostname as an alias for localhost
+        EDITOR_LOCALHOST_ALIASES="localhost;${EDITOR_LOCALHOST_ALIASES}"
+    fi
+    set -e
+    IFS=";"
+    for LOCALHOST_ALIAS in ${EDITOR_LOCALHOST_ALIASES}; do
+        echo "${LOCALHOST} ${LOCALHOST_ALIAS}" >> /etc/hosts
+    done
+fi
 
 # Docker
 if [ -z "${DOCKER_HOST}" ]; then
@@ -29,63 +43,4 @@ if [ -z "${DOCKER_HOST}" ]; then
     fi
 fi
 
-# Project
-if mountpoint /files >/dev/null 2>&1; then
-    editor_exec mkdir -p "/files/project"
-    editor_exec ln -sf "/files/project" "/home/$EDITOR_USER_NAME/project"
-else
-    editor_exec mkdir -p "/home/$EDITOR_USER_NAME/project"
-fi
-editor_exec cp -f /completion.sh "/home/$EDITOR_USER_NAME/.bash_completion"
-cd "/home/$EDITOR_USER_NAME/project"
-if [ ! -z "$EDITOR_CLONE" ]; then
-    editor_exec git clone "$EDITOR_CLONE" || true
-fi
-
-# Profile
-touch /tmp/.versions
-docker -v >> /tmp/.versions
-docker-compose -v >> /tmp/.versions
-echo ". /welcome.sh" >> "/home/$EDITOR_USER_NAME/.bashrc"
-
-# Extensions
-if [ ! -z "$EDITOR_EXTENSIONS" ]; then
-    IFS=";"
-    for EXTENSION in $EDITOR_EXTENSIONS; do
-        editor_exec code-server --install-extension "$EXTENSION" || true
-    done
-fi
-
-# Hosts
-if [ ! -z "$EDITOR_LOCALHOST_ALIASES" ]; then
-    set +e
-    LOCALHOST="127.0.0.1"
-    DOCKER_INTERNAL=$(host host.docker.internal | head -n1 | awk '{print $NF}')
-    if [ ! -z "$DOCKER_INTERNAL" ]; then
-        LOCALHOST="$DOCKER_INTERNAL"
-        # include special hostname as an alias for localhost
-        EDITOR_LOCALHOST_ALIASES="localhost;$EDITOR_LOCALHOST_ALIASES"
-    fi
-    set -e
-    IFS=";"
-    for LOCALHOST_ALIAS in $EDITOR_LOCALHOST_ALIASES; do
-        echo "$LOCALHOST $LOCALHOST_ALIAS" >> /etc/hosts
-    done
-fi
-
-# Settings
-EDITOR_LINE_ENDINGS="${EDITOR_LINE_ENDINGS:-LF}"
-if [ "$EDITOR_LINE_ENDINGS" != "CRLF" ]; then
-    editor_exec git config --global core.autocrlf false
-    editor_exec mkdir -p /home/editor/.local/share/code-server/User
-    editor_exec echo '{"files.eol": "\n"}' > /home/editor/.local/share/code-server/User/settings.json
-fi
-
-# Launch
-EDITOR_PORT="${EDITOR_PORT:-8443}"
-if [ ! -z "$EDITOR_PASSWORD" ]; then
-    export PASSWORD="$EDITOR_PASSWORD"
-    editor_exec code-server --port "$EDITOR_PORT" --allow-http
-else
-    editor_exec code-server --port "$EDITOR_PORT" --allow-http --no-auth
-fi
+/su-exec ${EDITOR_USER_NAME} editor.sh

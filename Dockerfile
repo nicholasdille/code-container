@@ -46,7 +46,8 @@ RUN apt-get update && \
 	chmod +x /usr/local/bin/dind
 # Kubernetes
 RUN curl -sSfL https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/bin/kubectl && \
-    chmod +x /usr/bin/kubectl
+    chmod +x /usr/bin/kubectl \
+    kubectl completion bash > /etc/bash_completion.d/kubectl
 
 ENTRYPOINT ["bash", "/entrypoint.sh"]
 CMD ["--allow-http", "--no-auth"]
