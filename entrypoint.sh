@@ -2,7 +2,6 @@
 editor_exec() {
     /su-exec "$EDITOR_USER_NAME" "$@"
 }
-set -e
 if [ -z "${DOCKER_HOST}" ]; then
     if [ ! -e /var/run/docker.sock ]; then
         echo "Error: /var/run/docker.sock not mounted"
@@ -20,8 +19,7 @@ EDITOR_GID="${EDITOR_GID:-10001}"
 EDITOR_USER="${EDITOR_UID}:${EDITOR_GID}"
 
 groupadd -g "$EDITOR_GID" "$EDITOR_GROUP_NAME" || \
-    groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1) || \
-    true
+    groupmod -n "$EDITOR_GROUP_NAME" $(getent group "$EDITOR_GID" | cut -d: -f1)
 useradd -m -u "$EDITOR_UID" -g "$EDITOR_GID" -G 0 -s /bin/bash "$EDITOR_USER_NAME"
 
 if mountpoint /files >/dev/null 2>&1; then
