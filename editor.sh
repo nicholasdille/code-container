@@ -42,7 +42,7 @@ fi
 EDITOR_PORT="${EDITOR_PORT:-8443}"
 if [ ! -z "${EDITOR_PASSWORD}" ]; then
     export PASSWORD="${EDITOR_PASSWORD}"
-    code-server --port "${EDITOR_PORT}" --allow-http
+    exec code-server --port "${EDITOR_PORT}" --allow-http
 else
-    code-server --port "${EDITOR_PORT}" --allow-http --no-auth
+    exec code-server --port "${EDITOR_PORT}" --allow-http --no-auth
 fi
